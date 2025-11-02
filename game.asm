@@ -161,25 +161,39 @@ GenerateAnswer ENDP
 ; 讀 4 位數輸入（自動判斷）
 ReadInput PROC
     mov cx, 0
-    mov si, OFFSET guess
+    mov si, cx
 ReadLoop:
     mov ah, 00h
     int 16h
-    cmp al, 1Bh
+    cmp al, 1Bh ;ESC
     je EndRead
-    cmp ah, 3Bh
+    cmp ah, 3Bh ;F1
     je EndRead
+    cmp al, 08h ;Backspace
+    jne check_num
+    cmp si, 0
+    je ReadLoop
+    dec si
+    dec cx
+    call GetCursorPosition
+    dec dl
+    call SetCursorPosition
+    PRINTCHAR ' '
+    call SetCursorPosition
+
+    jmp ReadLoop
+    
+check_num:
     cmp al, '0'
     jb Ignore
     cmp al, '9'
     ja Ignore
     cmp cx, 4
     jae EndRead
-    mov [si], al
+    mov guess[si], al
     inc si
     inc cx
-    mov ah, 0Eh
-    int 10h
+    PRINTCHAR al
     cmp cx, 4
     je EndRead
 Ignore:
@@ -259,4 +273,25 @@ PrintAB PROC
     ret
 PrintAB ENDP
 
+;取得游標位置
+GetCursorPosition PROC
+    push ax
+    push cx
+
+    mov ah, 03h
+    mov bh, 0   
+    int 10h
+    ; DH = row, DL = column
+    pop cx
+    pop ax
+
+    ret
+
+GetCursorPosition ENDP
+SetCursorPosition PROC
+    mov ah, 02h
+    mov bh, 0
+    int 10h
+    ret
+SetCursorPosition ENDP
 END main
