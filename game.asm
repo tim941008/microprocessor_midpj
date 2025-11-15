@@ -173,8 +173,6 @@ ReadLoop:
     jne check_num
     cmp si, 0
     je ReadLoop
-
-
     dec si
     dec cx
     call GetCursorPosition
@@ -187,9 +185,9 @@ ReadLoop:
     
 check_num:
     cmp al, '0'
-    jb ReadLoop
+    jb Ignore
     cmp al, '9'
-    ja ReadLoop
+    ja Ignore
     cmp cx, 4
     jae EndRead
     mov guess[si], al
@@ -198,6 +196,8 @@ check_num:
     PRINTCHAR al
     cmp cx, 4
     je EndRead
+Ignore:
+    jmp ReadLoop
 EndRead:
     ret
 ReadInput ENDP
